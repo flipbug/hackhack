@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/dan/.arduino15/packages/AZ3166/tools/**",
+                "/home/dan/.arduino15/packages/AZ3166/hardware/stm32f4/1.4.1/**"
+            ],
+            "forcedInclude": [
+                "/home/dan/.arduino15/packages/AZ3166/hardware/stm32f4/1.4.1/cores/arduino/Arduino.h"
+            ],
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}
