@@ -1,5 +1,3 @@
-#include <string>
-
 #include "AZ3166WiFi.h"
 #include "DevKitMQTTClient.h"
 #include "OledDisplay.h"
@@ -15,10 +13,11 @@ float data;
 
 static bool hasWifi = false;
 static bool hasIoTHub = false;
-static bool isFalling = false;
 
-volatile byte led = LOW;
-volatile byte interruptOn = HIGH;
+volatile int mevent = 0;
+
+volatile char led = LOW;
+volatile char interruptOn = HIGH;
 
 void setup() {
   // put your setup code here, to run once:
@@ -57,17 +56,25 @@ void setupAccelerometer() {
   acc_gyro->enableAccelerator();
   acc_gyro->enableGyroscope();
   acc_gyro->enablePedometer();
-  acc_gyro->enableFreeFallDetection(LSM6DSL_INT1_PIN);
   acc_gyro->setPedometerThreshold(LSM6DSL_PEDOMETER_THRESHOLD_MID_LOW);
 
-  attachInterrupt(D4, falling, FALLING);
+  acc_gyro->enableFreeFallDetection(LSM6DSL_INT1_PIN);
+  acc_gyro->setFreeFallThreshold(0);
+  acc_gyro->attachInt1Irq(&triggerMevent);
 }
 
 void printAccelerometer() {
       // getXAxes
     acc_gyro->getXAxes(axes);
-    Screen.print(1, std::to_string(axes[0]).c_str());
-    // Screen.print("Axes: x: %d, y: %d, z: %d\n", axes[0], axes[1], axes[2]);
+    char* c;
+    char* b;
+    
+    // b = itoa(axes[0], c, 10);
+    // Screen.print(1, b);
+    char buffer[50];
+    sprintf(buffer, "Axes: x: %d, y: %d, z: %d\n", axes[0], axes[1], axes[2]);
+    Screen.print(2, buffer);
+
     // getXSensitivity
     // acc_gyro->getXSensitivity(&data);
     //Screen.print("Sensitivity: ");
@@ -82,13 +89,17 @@ void loop() {
   // put your main code here, to run repeatedly:
   digitalWrite(LED_USER, led);
 
-        
-  if (isFalling) {
-    Screen.print(3, "Falling...");
+  if (mevent) {
+    mevent = 0;
+    LSM6DSL_Event_Status_t status;
+    acc_gyro->getEventStatus(&status);
+    if (status.FreeFallStatus) {
+      Screen.print(3, "Falling...");
+      wait(2);
+    }
   } else {
-    printAccelerometer();
+    // printAccelerometer();
   }
-
 
   /*
   if (hasIoTHub && hasWifi)
@@ -118,6 +129,6 @@ void blink()
   led = !led;
 }
 
-void falling() {
-  isFalling != isFalling;
+void triggerMevent() {
+  mevent = 1;
 }
